@@ -48,27 +48,6 @@ type alias Alias =
     String
 
 
-sequence : List (Parser res) -> Parser (List res)
-sequence ps =
-    let
-        accumulate acc ps cx =
-            case ps of
-                [] ->
-                    ( Ok (List.reverse acc), cx )
-
-                p :: ps ->
-                    case app p cx of
-                        ( Ok res, rcx ) ->
-                            accumulate (res :: acc) ps rcx
-
-                        ( Err ms, ecx ) ->
-                            ( Err ms, ecx )
-    in
-        primitive
-            <| \cx ->
-                accumulate [] ps cx
-
-
 reserved : List Name
 reserved =
     [ "module"
