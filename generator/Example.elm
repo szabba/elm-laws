@@ -3,11 +3,12 @@
 -- file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 
-module Example exposing (Example, DslPatternPart, extractDslPatternParts)
+module Example exposing (Example, DslPatternPart, parse)
 
 import String
-import Ast.Expression as Ast
 import List.Extra as List
+import Ast.Expression as Ast
+import Expression
 
 
 type alias Example =
@@ -20,6 +21,23 @@ type alias DslPatternPart =
     { dslKeyword : String
     , args : List Ast.Expression
     }
+
+
+parse : { dslExample : String, translation : String } -> Result (List String) Example
+parse { dslExample, translation } =
+    Result.map2 Example
+        (Expression.parse dslExample
+            |> Result.formatError (prefixErrorsWith "DSL example")
+            |> flip Result.andThen extractDslPatternParts
+        )
+        (Expression.parse translation
+            |> Result.formatError (prefixErrorsWith "DSL example translation")
+        )
+
+
+prefixErrorsWith : String -> List String -> List String
+prefixErrorsWith prefix =
+    List.map ((++) prefix << (++) ": ")
 
 
 addArgumentToPatternPart : Ast.Expression -> DslPatternPart -> DslPatternPart

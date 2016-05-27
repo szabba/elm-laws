@@ -16,24 +16,15 @@ main =
     App.beginnerProgram
         { model = ExampleForm.init
         , update = ExampleForm.update
-        , view =
-            ExampleForm.view
-                { getDslErrors = getDslErrors
-                , getTranslationErrors = getTranslationErrors
-                }
+        , view = ExampleForm.view getErrors
         }
 
 
-getDslErrors : String -> List String
-getDslErrors text =
-    case Expression.parse text `Result.andThen` Example.extractDslPatternParts of
+getErrors : { dslExample : String, translation : String } -> List String
+getErrors data =
+    case data |> Example.parse of
         Err errors ->
             errors
 
         Ok _ ->
             []
-
-
-getTranslationErrors : String -> List String
-getTranslationErrors =
-    always []

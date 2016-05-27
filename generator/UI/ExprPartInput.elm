@@ -48,8 +48,8 @@ update msg model =
 -- VIEW
 
 
-view : { hasErrors : Bool } -> Model -> Html Msg
-view { hasErrors } model =
+view : Model -> Html Msg
+view model =
     H.div
         [ HA.style
             [ (,) "font-family" "monospace"
@@ -59,13 +59,7 @@ view { hasErrors } model =
             ]
         ]
         [ H.span
-            [ HA.style
-                ([ (,) "margin" "10px" ]
-                    ++ if hasErrors then
-                        []
-                       else
-                        [ (,) "color" "red" ]
-                )
+            [ HA.style [ (,) "margin" "10px" ]
             ]
             [ H.text model.prefix ]
         , H.input

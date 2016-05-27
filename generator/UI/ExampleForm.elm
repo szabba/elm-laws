@@ -52,38 +52,26 @@ update msg model =
 
 
 view :
-    { getDslErrors : String -> List String
-    , getTranslationErrors : String -> List String
-    }
+    ({ dslExample : String, translation : String } -> List String)
     -> Model
     -> Html Msg
-view { getDslErrors, getTranslationErrors } model =
-    let
-        dslErrors =
-            model.dslExpr
-                |> ExprPartInput.text
-                |> getDslErrors
-
-        translationErrors =
-            []
-    in
-        H.div []
-            (viewInput DslExpr getDslErrors model.dslExpr
-                ++ viewInput Translation getTranslationErrors model.translation
-            )
-
-
-viewInput : (ExprPartInput.Msg -> Msg) -> (String -> List String) -> ExprPartInput.Model -> List (Html Msg)
-viewInput wrapMsg getErrors inputModel =
-    let
-        errors =
-            inputModel |> ExprPartInput.text |> getErrors
-    in
-        [ inputModel
-            |> ExprPartInput.view { hasErrors = not (List.isEmpty errors) }
-            |> App.map wrapMsg
-        , errorList errors
+view getErrors model =
+    H.div []
+        [ model.dslExpr |> ExprPartInput.view |> App.map DslExpr
+        , model.translation |> ExprPartInput.view |> App.map Translation
+        , errorList
+            <| getErrors
+            <| { dslExample = model.dslExpr |> ExprPartInput.text
+               , translation = model.translation |> ExprPartInput.text
+               }
         ]
+
+
+viewInput : (ExprPartInput.Msg -> Msg) -> ExprPartInput.Model -> Html Msg
+viewInput wrapMsg inputModel =
+    inputModel
+        |> ExprPartInput.view
+        |> App.map wrapMsg
 
 
 errorList : List String -> Html msg
