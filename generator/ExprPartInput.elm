@@ -30,6 +30,16 @@ init prefix =
     Model prefix "" (prefix |> parseExpression |> snd)
 
 
+text : Model -> String
+text { prefix, suffix } =
+    prefix ++ suffix
+
+
+expression : Model -> Maybe Ast.Expression
+expression model =
+    model |> text |> parseExpression |> fst
+
+
 
 -- UPDATE
 
