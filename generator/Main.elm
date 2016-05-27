@@ -5,17 +5,35 @@
 
 module Main exposing (..)
 
-import Html as H exposing (Html)
 import Html.App as App
-import Html.Attributes as HA
-import Html.Events as HE
-import ExprPartInput
+import Example
+import Expression
+import UI.ExampleForm as ExampleForm
 
 
 main : Program Never
 main =
     App.beginnerProgram
-        { model = ExprPartInput.init "claim d |> "
-        , update = ExprPartInput.update
-        , view = ExprPartInput.view
+        { model = ExampleForm.init
+        , update = ExampleForm.update
+        , view =
+            ExampleForm.view
+                { getDslErrors = getDslErrors
+                , getTranslationErrors = getTranslationErrors
+                }
         }
+
+
+getDslErrors : String -> List String
+getDslErrors text =
+    case Expression.parse text `Result.andThen` Example.extractDslPatternParts of
+        Err errors ->
+            errors
+
+        Ok _ ->
+            []
+
+
+getTranslationErrors : String -> List String
+getTranslationErrors =
+    always []
