@@ -19,7 +19,7 @@ type alias Example =
 
 type alias DslPatternPart =
     { dslKeyword : String
-    , args : List Ast.Expression
+    , args : Maybe Ast.Expression
     }
 
 
@@ -38,11 +38,6 @@ parse { dslExample, translation } =
 prefixErrorsWith : String -> List String -> List String
 prefixErrorsWith prefix =
     List.map ((++) prefix << (++) ": ")
-
-
-addArgumentToPatternPart : Ast.Expression -> DslPatternPart -> DslPatternPart
-addArgumentToPatternPart arg part =
-    { part | args = part.args ++ [ arg ] }
 
 
 extractDslPatternParts : Ast.Expression -> Result (List String) (List DslPatternPart)
@@ -73,7 +68,7 @@ extractDslPatternPart : Ast.Expression -> Result (List String) DslPatternPart
 extractDslPatternPart expr =
     case expr of
         Ast.Variable [ dslKeyword ] ->
-            DslPatternPart dslKeyword [] |> Ok
+            DslPatternPart dslKeyword Nothing |> Ok
 
         Ast.Variable varParts ->
             let
@@ -88,13 +83,11 @@ extractDslPatternPart expr =
                 Err [ msg ]
 
         Ast.Application (Ast.Variable [ dslKeyword ]) arg ->
-            DslPatternPart dslKeyword [ arg ]
+            DslPatternPart dslKeyword (Just arg)
                 |> Ok
 
         Ast.Application innerApp arg ->
-            innerApp
-                |> extractDslPatternPart
-                |> Result.map (addArgumentToPatternPart arg)
+            Err [ "a DSL keyword must have at most one argument " ]
 
         _ ->
             Err [ "a |> should be followed by function application" ]
